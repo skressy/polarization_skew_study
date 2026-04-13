@@ -3,5 +3,7 @@ We test a series of geometries (uniform, sinusoidal, helical, and hourglass) for
 These are toy box simulations, modeling magnetic fields and turbulence. Density and temperature are ignored/assumed constant throughout.
 
 All geometries and models are found in the magnetic_fields.py script. 
-Plotting is in plotting_functions.py
+Plotting is in plotting_functions.py.
+
+
 You can run the models with the Jupyter Notebook analysis.ipynb.
