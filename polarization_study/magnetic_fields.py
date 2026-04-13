@@ -158,55 +158,6 @@ def _geometry_hourglass(X, Y, Z, alpha, iaxis=2, **_):
     B0_ref = np.sqrt(np.mean(Bx0**2 + By0**2 + Bz0**2))
     return Bx0, By0, Bz0, b_hat, B0_ref
 
-    # """
-    # Hourglass field following Ewertowski & Basu (2013), eqs. 10-11.
-    # Br = sum_m km*sqrt(lam_m)*J1(sqrt(lam_m)*r)*[erfc(a-)*exp(-) - erfc(a+)*exp(+)]
-    # Bz = sum_m km*sqrt(lam_m)*J0(sqrt(lam_m)*r)*[erfc(a+)*exp(+) + erfc(a-)*exp(-)] + B0
-    # where a± = sqrt(lam_m)*h/2 ± z/h, lam_m = (root_m/R)^2
-    # """
-    # R_outer  = np.pi          # core radius = half box width (in grid units [-pi, pi])
-    # h       = 0.5 * R_outer   # vertical current scale length; controls waist tightness
-    # B0      = 1.0             # background field along Z
-    # N_terms = 3
-    # roots  = jn_zeros(1, N_terms)          # roots of J1
-
-    # km_vals = np.array([1.0, 0.3, 0.1])     # Simple decreasing weights (Ewertowski+2013 style fitting, first term dominates)
-    # lam      = (roots / R_outer)**2
-    # sqrt_lam = np.sqrt(lam)
-
-    # R_phys      = np.sqrt(X**2 + Y**2)
-    # R_phys_safe = np.where(R_phys == 0, 1e-12, R_phys)
-
-    # Br0 = np.zeros_like(X)
-    # Bz0 = np.zeros_like(X)
-
-    # for m in range(N_terms):
-    #     km = km_vals[m]
-    #     sl = sqrt_lam[m]
-
-    #     arg_minus = sl*h/2.0 - Z/h
-    #     arg_plus  = sl*h/2.0 + Z/h
-
-    #     # Clip exponents to avoid overflow (field is B0 outside core anyway)
-    #     exp_neg = np.exp(np.clip(-sl * Z, -50, 50))
-    #     exp_pos = np.exp(np.clip( sl * Z, -50, 50))
-
-    #     er_minus = erfc(arg_minus)
-    #     er_plus  = erfc(arg_plus)
-
-    #     Br0 += km * sl * j1(sl * R_phys) * (er_minus*exp_neg - er_plus*exp_pos)
-    #     Bz0 += km * sl * j0(sl * R_phys) * (er_plus*exp_pos + er_minus*exp_neg)
-
-    # Bz0 += B0
-
-    # # Outside the core radius, field relaxes to B0 — already handled by erfc decay
-    # Bx0 = Br0 * (X / R_phys_safe)
-    # By0 = Br0 * (Y / R_phys_safe)
-
-    # b_hat  = _los_b_hat(iaxis)
-    # B0_ref = np.sqrt(np.mean(Bx0**2 + By0**2 + Bz0**2))
-    # return Bx0, By0, Bz0, b_hat, B0_ref
-
 _GEOMETRIES = {
     'uniform'   : _geometry_uniform,
     'wavy'      : _geometry_wavy,
