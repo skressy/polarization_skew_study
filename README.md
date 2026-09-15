@@ -8,3 +8,4 @@ Plotting is in plotting_functions.py.
 You can run the models with the Jupyter Notebook analysis.ipynb.
 
 A more detailed explanation of the model and results can be found in the paper: https://arxiv.org/abs/2609.15925 
+Zenodo: DOI: 10.5281/zenodo.22774378
