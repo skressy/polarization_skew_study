@@ -19,7 +19,6 @@ Each geometry returns (Bx0, By0, Bz0, b_hat, B0_ref) where:
 
 import numpy as np
 from scipy.special import jn_zeros, j0, j1, erfc
-import matplotlib.pyplot as plt
 
 
 def _make_grid(g_size):
@@ -71,24 +70,13 @@ def _geometry_uniform(X, Y, Z, alpha, iaxis=2, **_):
 
 
 def _geometry_wavy(X, Y, Z, alpha, iaxis=2, frequency=1.0, amplitude_range=(1.0, 1.0), **_):
-    # g_size    = X.shape[2]
-    # amplitude = np.linspace(amplitude_range[0], amplitude_range[1], g_size)
-
-    # Bx0 = np.zeros_like(X)
-    # By0 = np.zeros_like(X)
-    # Bz0 = np.zeros_like(X)
-
-    # for iz in range(g_size):
-    #     theta         = amplitude[iz] * np.cos(frequency * X[:, :, iz])
-    #     Bx0[:, :, iz] = np.cos(theta)
-    #     By0[:, :, iz] = np.sin(theta)
-
-    # b_hat  = _los_b_hat(iaxis)
-    # B0_ref = np.sqrt(np.mean(Bx0**2 + By0**2 + Bz0**2))
-    # return Bx0, By0, Bz0, b_hat, B0_ref
-
-    bx0 = 1.0
-    bz0 = 0.0
+    """
+    Wavy field: field direction rotates as a cosine wave in X across the POS.
+    theta(x) = amplitude * cos(frequency * x)
+    Bx = cos(theta), By = sin(theta), Bz = 0  — same for every Z slice.
+    b_hat : along LOS — no meaningful single POS mean direction
+    B0_ref: RMS(|B0|) over the grid
+    """
     g_size    = X.shape[2]
     amplitude = np.linspace(amplitude_range[0], amplitude_range[1], g_size)
 
@@ -96,15 +84,10 @@ def _geometry_wavy(X, Y, Z, alpha, iaxis=2, frequency=1.0, amplitude_range=(1.0,
     By0 = np.zeros_like(X)
     Bz0 = np.zeros_like(X)
 
-    # for iz in range(g_size):
-    #     theta         = amplitude[iz] * np.cos(frequency * X[:, :, iz])
-    #     Bx0[:, :, iz] = np.cos(theta)
-    #     By0[:, :, iz] = np.sin(theta)
-
     for iz in range(g_size):
-        Bx0[:, :, iz] = bx0
-        By0[:, :, iz] = amplitude[iz] * np.cos(frequency * X[:, :, iz])
-        Bz0[:, :, iz] = bz0
+        theta         = amplitude[iz] * np.cos(frequency * X[:, :, iz])
+        Bx0[:, :, iz] = np.cos(theta)
+        By0[:, :, iz] = np.sin(theta)
 
     b_hat  = _los_b_hat(iaxis)
     B0_ref = np.sqrt(np.mean(Bx0**2 + By0**2 + Bz0**2))
@@ -185,17 +168,6 @@ def _geometry_hourglass(X, Y, Z, alpha, iaxis=2, **_):
 
     b_hat  = _los_b_hat(iaxis)
     B0_ref = np.sqrt(np.mean(Bx0**2 + By0**2 + Bz0**2))
-
-    # diagnostic for showing hot spots in map
-    # r_mid = g_size // 2
-    # Z_slice = Z[r_mid, r_mid, :].ravel()
-    # Br_slice = Br0[r_mid, r_mid, :].ravel()
-    # order = np.argsort(Z_slice)
-
-    # plt.plot(Z_slice[order], Br_slice[order])
-    # plt.xlabel('Z')
-    # plt.ylabel('Br')
-
     return Bx0, By0, Bz0, b_hat, B0_ref
 
 _GEOMETRIES = {
@@ -483,7 +455,7 @@ def _stokes_and_polarization(Bx, By, Bz, iaxis, sigma_noise=0.0, seed=None):
 
 
 def simulate_field(geometry='helical', turbulence='gs95', M_A=1.0, alpha=0.0, iaxis=2, g_size=64,
-                   anisotropy_strength=1.0, seed=None, snoise = 0.0, **kwargs):
+                   anisotropy_strength=1, seed=None, snoise = 0.0, **kwargs):
     """
     Generate a synthetic polarization map.
 
